@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+    image: weather-app/php:dev
+    container_name: weather-app-php
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./:/var/www/weather-app
+      - ./.docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./.docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+    networks:
+      - weather-app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: weather-app-nginx
+    restart: unless-stopped
+    depends_on:
+      - php
+    volumes:
+      - ./:/var/www/weather-app
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - '80:80'
+    networks:
+      - weather-app-network
+
+  postgres:
+    image: postgres:latest
+    container_name: weather-app-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:rw
+    ports:
+      - '5432:5432'
+    networks:
+      - weather-app-network
+
+networks:
+  weather-app-network:
+
+volumes:
+  postgres_data:
