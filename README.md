@@ -5,6 +5,12 @@ Weather API
 This is the Weather API Symfony project.
 
 ---
+To run this app, you need to install:
+
+- Docker
+- Docker compose
+- Ngrok
+
 
 To run app:
 
